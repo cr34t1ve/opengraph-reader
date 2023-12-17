@@ -1,0 +1,17 @@
+{
+  "name": "opengraph-reader",
+  "version": "1.0.0",
+  "description": "A worker on an express server to read opengraph metadata from links",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "cr34t1ve",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2"
+  }
+}
