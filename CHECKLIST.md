@@ -7,3 +7,4 @@
   - Fetch the title of the article
   - Fetch any image links available
   - Write it to file with a completion date
+  - Write it to a postgres database with a completion date

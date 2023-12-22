@@ -24,7 +24,7 @@ const queue = "rpc_queue";
           console.error(err);
           return;
         });
-        console.log(" [.] response: ", response);
+        // console.log(" [.] response: ", response);
         channel.sendToQueue(
           message.properties.replyTo,
           Buffer.from(JSON.stringify(response)),

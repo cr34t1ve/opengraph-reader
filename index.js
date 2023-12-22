@@ -1,9 +1,19 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { connect } from "amqplib";
+import pg from "pg";
 import { v4 as uuidv4 } from "uuid";
 import { writeFile, readFile } from "fs/promises";
 import { existsSync } from "fs";
+
+const client = new pg.Pool({
+  user: "postgres",
+  host: "localhost",
+  database: "ogworker",
+  password: "boondocks",
+  port: 5432,
+});
+await client.connect();
 
 const queue = "rpc_queue";
 
@@ -14,14 +24,16 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 const port = 3323;
 
-async function saveToFile(data) {
+function getCompletionDate() {
   const completionDate = new Date();
-  const formattedDate = `${completionDate.getDate()}-${
+  return `${completionDate.getDate()}-${
     completionDate.getMonth() + 1
   }-${completionDate.getFullYear()} ${completionDate.getHours()}:${completionDate.getMinutes()}:${completionDate.getSeconds()}`;
+}
 
+async function saveToFile(data) {
   const dataToSave = {
-    completionDate: formattedDate,
+    completionDate: getCompletionDate(),
     ...data,
   };
 
@@ -66,7 +78,6 @@ async function emitToQueue(data) {
     });
 
     const OGData = await requestOG;
-    console.log(" [.] Got %s", OGData);
     return OGData;
   } catch (err) {
     console.warn(err);
@@ -98,15 +109,14 @@ app.post("/read", async (req, res) => {
 
   const data = await emitToQueue(bodyLink);
 
-  const OGData = JSON.parse(data);
+  const { title, image } = JSON.parse(data);
 
-  const imageLinks = Object.keys(OGData).filter((key) => key.includes("image"));
+  await client.query(
+    "INSERT INTO articles (link, title, image, completion_date) VALUES ($1, $2, $3, $4) RETURNING *",
+    [bodyLink, title, image, new Date()]
+  );
 
-  const images = imageLinks.map((link) => {
-    return { type: link, image: OGData[link] };
-  });
-
-  await saveToFile({ link: bodyLink, title: OGData.title, images });
+  await saveToFile({ link: bodyLink, title, image });
 
   res.json("Open Graph data saved to file");
 });
