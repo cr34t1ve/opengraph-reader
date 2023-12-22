@@ -1,4 +1,4 @@
-## Open Graph Scraper with RabbitMQ
+## Open Graph Scraper Worker with RabbitMQ and ExpressJS
 
 This is a simple example of how to use RabbitMQ to scrape Open Graph data from a URLs.
 
